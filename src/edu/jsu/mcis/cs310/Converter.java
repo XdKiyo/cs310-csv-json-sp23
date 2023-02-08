@@ -5,6 +5,8 @@ import com.opencsv.*;
 import java.io.*;
 import java.util.*;
 import java.text.DecimalFormat;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Converter {
     
@@ -82,27 +84,49 @@ public class Converter {
         try {
         
             // INSERT YOUR CODE HERE;
+             LinkedHashMap<String, Object> JsonRecord = new LinkedHashMap<>();
+            JsonArray data = new JsonArray();
+            JsonArray prodNum = new JsonArray();
+           
             CSVReader reader = new CSVReader(new StringReader(csvString));
             List<String[]> full = reader.readAll();
             Iterator<String[]> iterator = full.iterator();
-            
-            String[] current_row = iterator.next();
-            
-            while(iterator.hasNext())
-            {
-                current_row = iterator.next();
+
+            if(iterator.hasNext())
+            {              
+                String[] headings = iterator.next();  
                 
-                for (int i = 1; i < current_row.length; ++i) {
-                    System.out.print(current_row[i]); // DEBUG LINE - not useful for code, only to show output. Remove in final
+                while(iterator.hasNext())
+                {
+                    String[] csvData = iterator.next();  
+                    prodNum.add(csvData[0]);  
+                    JsonArray lineData = new JsonArray();  
+                    
+                    for(int i = 1; i < headings.length; i++)
+                    {  
+                        
+                       if(headings[i].endsWith("Season") || headings[i].endsWith("Episode"))
+                       {
+                           lineData.add(Integer.valueOf(csvData[i]));
+                       }
+                       
+                       else
+                       {
+                            lineData.add(csvData[i]);
+                       }
+                    }
+                    data.add(lineData);  
                 }
-                
-                System.out.println(","); // DEBUG LINE - not useful for code, only to show output. Remove in final
+                                
+                JsonRecord.put("ProdNums", prodNum);
+                JsonRecord.put("ColHeadings", headings);
+                JsonRecord.put("Data", data);
             }
+            
+            String jsonString = Jsoner.serialize(JsonRecord);
+            result = jsonString;   
+        
         }
-        
-       
-        
-        
         catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,24 +147,23 @@ public class Converter {
             
             JsonArray colheadings = new JsonArray();
             colheadings=(JsonArray) (jsonObject.get("ColHeadings"));
-            //System.out.println(colheadings);
+            
             
             JsonArray pnumber = new JsonArray();
             pnumber=(JsonArray) (jsonObject.get("ProdNums"));
-            //System.out.println(pnumber);
+            
             
             JsonArray dataall = new JsonArray();
             dataall=(JsonArray) (jsonObject.get("Data"));
-            //System.out.println(dataall);
             
             
-                       
+            
             
             StringWriter stringWriter = new StringWriter();
             CSVWriter csvWriter = new CSVWriter(stringWriter, ',', '"', '\\', "\n");
    
             
-            // insert headings
+            
             String[] headings = new String[colheadings.size()];
             for (int i = 0; i < colheadings.size(); i++) {
                 headings[i] = colheadings.get(i).toString();
@@ -148,25 +171,25 @@ public class Converter {
             csvWriter.writeNext(headings);
             
             
-            //print the data and product number
+            
             for(int i=0;i<pnumber.size();i++){
                 String[] row= new  String[colheadings.size()];
                 JsonArray data = new JsonArray(); 
                 data=(JsonArray) dataall.get(i);
                 
-                //adding the pnumebr and data to the writer
+                
                 row[0]=pnumber.get(i).toString();
                 for (int j = 0; j < data.size(); j++) {
-                    //System.out.println(data.get(colheadings.indexOf("Episode")-1));
+                    
                     if(data.get(j)==data.get(colheadings.indexOf("Episode")-1)){
                         
-                        //System.out.println(data.get(colheadings.indexOf("Episode")-1)=="1");                        
+                                              
                         int number = Integer.parseInt(data.get(j).toString());
                         String formattedNumber = "";
                         
                         formattedNumber = decimalFormat.format(number);
                         
-                        //System.out.println(formattedNumber);
+                        
                         row[j+1]=formattedNumber;
                     }
                     else{
@@ -179,9 +202,8 @@ public class Converter {
                 
                 
             }
-            //System.out.println(pnumber.get(0));
             
-            result = stringWriter.toString();
+              result = stringWriter.toString();
             
             
         }
