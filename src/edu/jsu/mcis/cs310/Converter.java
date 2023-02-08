@@ -2,6 +2,8 @@ package edu.jsu.mcis.cs310;
 
 import com.github.cliftonlabs.json_simple.*;
 import com.opencsv.*;
+import java.io.*;
+import java.util.*;
 
 public class Converter {
     
@@ -78,13 +80,43 @@ public class Converter {
         
         try {
         
-            // INSERT YOUR CODE HERE
+            // INSERT YOUR CODE HERE;
+            JsonArray data = new JsonArray();
+            JsonArray prodNum = new JsonArray();
+            CSVReader reader = new CSVReader(new StringReader(csvString));
+            List<String[]> full = reader.readAll();
+            Iterator<String[]> iterator = full.iterator();
             
+            // Skip first row - the header
+            String[] current_row = iterator.next();
+            
+            while(iterator.hasNext())
+            {
+                current_row = iterator.next();
+                
+                for (int i = 1; i < current_row.length; ++i) {
+                    System.out.print(current_row[i] + " "); // DEBUG LINE - not useful for code, only to show output. Remove in final
+                }
+                 
+                
+                
+                
+                
+                
+                
+                
+                
+                System.out.println(","); // DEBUG LINE - not useful for code, only to show output. Remove in final
+            }
         }
+        
+       
+        
+        
         catch (Exception e) {
             e.printStackTrace();
         }
-        
+         System.out.println("CSV read complete");
         return result.trim();
         
     }
